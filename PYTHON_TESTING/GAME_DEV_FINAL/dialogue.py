@@ -1,47 +1,64 @@
+# DIALOGUE MANAGEMENT SYSTEM
+
 import pygame as pg
 
 class Dialogue:
-    """
-    Manages and displays dialogue lines with a single, fixed appearance.
-    """
+
     def __init__(self, screen_width, screen_height):
+        # Store the width and height of the game screen.
         self.screen_width = screen_width
         self.screen_height = screen_height
         
-        # --- Fixed Settings for all Dialogue Boxes ---
+        # Set the font size for the text.
         self.font_size = 50
-        self.text_color = (255, 255, 255)    # White text
-        self.box_color = (0, 0, 0, 200)     # Semi-transparent black for the dialogue box
+
+        # Set the color for the text.
+        self.text_color = (255, 255, 255)
         
-        # Fixed dialogue box dimensions (80% width, 30% height of screen)
-        self.dialogue_box_width = int(screen_width * 0.8)  
-        self.dialogue_box_height = int(screen_height * 0.3) 
+        # Set the color for the dialogue box background (semi-transparent black).
+        self.box_color = (0, 0, 0, 200)
         
-        # Dialogue box is always centered
+        # Calculate the width of the dialogue box.
+        self.dialogue_box_width = int(screen_width * 0.8) 
+        # Calculate the height of the dialogue box.
+        self.dialogue_box_height = int(screen_height * 0.3)
+        
+        # Create a rectangle that defines the position and size of the dialogue box.
+        # It's centered horizontally and vertically on the screen.
         self.dialogue_box_rect = pg.Rect(
-            (self.screen_width - self.dialogue_box_width) // 2,  
-            (self.screen_height - self.dialogue_box_height) // 2, 
+            (self.screen_width - self.dialogue_box_width) // 2, 
+            (self.screen_height - self.dialogue_box_height) // 2,
             self.dialogue_box_width,
             self.dialogue_box_height
         )
 
-        # Font setup
+        # Set the file path for the custom font and load the font with the specified size.
         self.font_path = "GAME_DEV_FINAL/assets/font/bytebounce/ByteBounce.ttf"
         self.font = pg.font.Font(self.font_path, self.font_size)
         
-        self.dialogue_active = False # True when dialogue box is on screen
-        self.current_dialogue_lines = [] # List of lines for the current dialogue sequence
-        self.current_dialogue_line_index = 0 # Index of the line currently displayed
-        self.last_dialogue_level_completed = None # Tracks which dialogue sequence just ended
-        self.COOLDOWN_FRAMES = 60 # Cooldown for transitions (e.g., 1 second at 60 FPS)
+        # A flag to check if dialogue is currently active and should be shown.
+        self.dialogue_active = False
 
-        # Dialogue content for each level/key (now just lists of strings)
+        # A list to hold all the lines of dialogue for the current sequence.
+        self.current_dialogue_lines = []
+
+        # An index to keep track of which line is currently being displayed.
+        self.current_dialogue_line_index = 0
+
+        # Stores the key of the last dialogue sequence that finished.
+        self.last_dialogue_level_completed = None
+
+        # A cooldown period to prevent rapid dialogue advancement. (In game frames)
+        self.COOLDOWN_FRAMES = 60
+
+        # Create a dictionary to store all the dialogue lines for different parts of the game (levels/keys).
+        # Each keys connect to a list of strings, where each string is a dialogue line. (values)
         self.level_dialogues = {
             1: [
                 "Shinji: uhhhh my head hurts, huh where am I?",
                 "Shinji: Is this a cave!? Why am I in a cave!?",
                 "Shinji: Wait I see light maybe it\'s the exit?", 
-                "Shinji: It\'s so bright outside.", # This is the line where the overlay will disappear
+                "Shinji: It\'s so bright outside.",
                 "Shinji: Huh? am I in a forest?",
                 "Shinji: Wait, why am I in the middle of the forest",
                 "- A familiar voice you hear - ",
@@ -65,71 +82,98 @@ class Dialogue:
                 "Shinji: Wait a sec.",
                 "Shinji: That forest looks mysterious...",
                 "Shinji: Maybe I could past my way there."
-            ],
-            4: [ # This is likely your 'Game Completion' dialogue\
-                "Shinji is now dead.",
             ]
         }
-        # Define the index at which the dark overlay should be removed for level 1
-        # "Shinji: It's so bright outside." is at index 3 in the level 1 dialogue list (0-indexed)
+
+        # Defines the index of the dialogue line in level 1 after which a dark screen overlay should disappear.
         self.REMOVE_OVERLAY_INDEX_LVL1 = 3 
 
     def set_level_dialogue(self, level_key):
-        """
-        Loads the dialogue lines for a specific level or key.
-        If the level_key is not found, it sets an empty dialogue.
-        """
-        # Get dialogue lines; if the key isn't found, an empty list is used
+        # Sets the dialogue lines to be displayed based on a given level key.
+
+        # Get the list of dialogue lines for the given key, or an empty list if key not found.
         self.current_dialogue_lines = self.level_dialogues.get(level_key, [])
+
+        # Reset the current line index to the beginning of the new dialogue.
         self.current_dialogue_line_index = 0
-        self._current_dialogue_key = level_key # Keep track of the current dialogue's key
+
+        # Store the key of the dialogue currently being set.
+        self._current_dialogue_key = level_key
 
     def start_dialogue(self):
-        """Activates the dialogue display."""
+        # Activates the dialogue system, making the dialogue box visible.
         self.dialogue_active = True
 
     def advance_dialogue(self):
-        """
-        Advances to the next dialogue line. Returns True if more lines, False if dialogue ends.
-        """
+        # Moves to the next line of dialogue.
+        # Returns True if there are more lines to show, False if the dialogue has ended.
+
+        # Increment the index to show the next line.
         self.current_dialogue_line_index += 1
+
+        # Check if there are still more lines left in the current dialogue sequence.
         if self.current_dialogue_line_index < len(self.current_dialogue_lines):
-            return True # More lines to show
+            return True
         else:
-            self.dialogue_active = False # Deactivate dialogue when all lines are shown
-            self.current_dialogue_line_index = 0 # Reset index for next time
-            self.last_dialogue_level_completed = self._current_dialogue_key # Mark which dialogue just ended
+            self.dialogue_active = False
+
+            # Reset the line index for future dialogues.
+            self.current_dialogue_line_index = 0
+
+            # Record which dialogue sequence just finished.
+            self.last_dialogue_level_completed = self._current_dialogue_key
+
+            # Return False, indicating dialogue is over.
             return False
 
     def is_dialogue_active(self):
-        """Returns True if the dialogue box is currently active."""
+        # Checks if the dialogue box is currently on the screen.
         return self.dialogue_active
 
     def _draw_dark_overlay(self, screen):
-        """Draws a semi-transparent dark overlay over the entire screen."""
+        # Draws a semi-transparent dark layer over the entire game screen.
+        # This is used to darken the background when dialogue is showing.
+
+        # Create a new transparent surface the size of the screen.
         overlay = pg.Surface((self.screen_width, self.screen_height), pg.SRCALPHA)
-        overlay.fill((0, 0, 0, 230)) # Black with 180 alpha (semi-transparent)
+        
+        # Fill the overlay with a dark color and some transparency (alpha 230).
+        overlay.fill((0, 0, 0, 230))
+        
+        # Draw the overlay onto the main game screen.
         screen.blit(overlay, (0, 0))
 
     def draw_dialogue(self, screen):
-        """Draws the current dialogue box and text on the screen."""
+        # Draws the dialogue box and the current line of text on the screen.
+  
+        # If dialogue is not active, do nothing and return.
         if not self.dialogue_active:
             return
 
-        # NEW: Apply dark overlay if it's level 1 dialogue and before the specific line
+        # Check if it's level 1 dialogue and check if the current line index is before the specific point
+        # where the overlay should disappear.
         if self._current_dialogue_key == 1 and self.current_dialogue_line_index < self.REMOVE_OVERLAY_INDEX_LVL1:
             self._draw_dark_overlay(screen)
 
-        # Draw the semi-transparent background box for dialogue text
+        # Create a semi-transparent surface for the dialogue box itself. (s for surface)
         s = pg.Surface((self.dialogue_box_rect.width, self.dialogue_box_rect.height), pg.SRCALPHA)
+
+        # Fill this surface with the dialogue box color.
         s.fill(self.box_color)
+
+        # Draw the dialogue box background onto the main screen.
         screen.blit(s, self.dialogue_box_rect)
 
-        # Render and position the current dialogue line
-        if self.current_dialogue_lines: # Only draw if there are actual lines
+        # This will only proceed to render text if there are actual dialogue lines loaded.
+        if self.current_dialogue_lines:
+            # Get the current line of dialogue to display.
             current_line = self.current_dialogue_lines[self.current_dialogue_line_index]
+
+            # Render the text surface from the current line using the chosen font and color.
             text_surface = self.font.render(current_line, True, self.text_color)
             
-            # Center the text within the dialogue box
+            # Get the rectangle for the rendered text and center it within the dialogue box.
             text_rect = text_surface.get_rect(center=(self.dialogue_box_rect.centerx, self.dialogue_box_rect.centery))
+
+            # Draw the text surface onto the main screen at its centered position.
             screen.blit(text_surface, text_rect)
