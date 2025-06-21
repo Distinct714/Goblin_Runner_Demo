@@ -11,6 +11,8 @@ from level_display import LevelDisplay
 from dialogue import Dialogue
 from enemy import Enemy 
 
+# IMPORTANT NOTE: CHANGE ALL THE PATH FILE INTO YOUR OWN RELATIVE PATH FILE TO PREVENT ERRORS.
+
 class Goblin_Runner:
 
     def __init__(self):
