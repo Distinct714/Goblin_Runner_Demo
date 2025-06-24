@@ -3,9 +3,9 @@
 import pygame as pg
 
 class Character:
-    # Stores all the image file paths for character animations.
+    # Stores all the image file paths for character animations.  (Using List Comprehension for short code)
     CHARACTER_ANIMATIONS = {
-        # Images for standing still, facing left and right. (Using List Comprehension for short code)
+        # Images for standing still, facing left and right.
         'idle_left': [f'GAME_DEV_FINAL/assets/sprite/shinji/shinji standing left/standing{i} left.png' for i in range(1, 5)],
         'idle_right': [f'GAME_DEV_FINAL/assets/sprite/shinji/shinji standing right/standing{i}.png' for i in range(1, 5)],
 
