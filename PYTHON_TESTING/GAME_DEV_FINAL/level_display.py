@@ -182,5 +182,5 @@ class LevelDisplay:
         text_rect = text_surface.get_rect(center=(box_x + self.tutorial_rect_width // 2, box_y + self.tutorial_rect_height // 2))
         screen.blit(text_surface, text_rect)
 
-         # Tutorial is still running.
+         # Run this if tutorial is still running.
         return False
