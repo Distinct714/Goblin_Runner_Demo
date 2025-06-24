@@ -1,2 +1,2 @@
 # Goblin_Runner
-This is not yet official game and you might encounter a bugs here
+This is not yet official game. The game is still in development and you might encounter an unexpected bugs here.
