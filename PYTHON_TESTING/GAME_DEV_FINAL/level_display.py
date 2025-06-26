@@ -1,269 +1,187 @@
-# GAME MENU MANAGEMENT SYSTEM
+# LEVEL DISPLAY MANAGEMENT SYSTEM
 
 import pygame as pg
-import sys
 
-class GameMenu:
-    # Define standard dimensions for buttons.
-    BUTTON_DIMS = {'main': (400, 100), 'back': (250, 80)}
+class LevelDisplay:
+    
+    def __init__(self, screen_width, screen_height, level_font_size=60, level_text_pos_y=50):
+        # Store the width and height of the game screen.
+        self.screen_width = screen_width
+        self.screen_height = screen_height
 
-    # Define specified colors for the game menu.
-    COLORS = {'button': (104, 37, 37), 'hover': (150, 50, 50), 'text': (255, 255, 255), 'title_text': (0, 0, 0)}
-
-    def __init__(self, screen, game_instance):
-        # Stores the Pygame screen surface. Keeps a reference to the main game object.
-        self.screen = screen
-        self.game = game_instance
-
-        # Gets the width and height of the game screen.
-        self.screen_width = screen.get_width()
-        self.screen_height = screen.get_height()
-
-        # Set the file path for the custom font and set the various variable with specified size. (Change the path file here)
-        self.font_path = 'GAME_DEV_FINAL/assets/font/bytebounce/ByteBounce.ttf'
-        self.font_large = pg.font.Font(self.font_path, 220)
-        self.font_medium = pg.font.Font(self.font_path, 100)
-        self.font_regular = pg.font.Font(self.font_path, 70)
-        self.font_small = pg.font.Font(self.font_path, 50)
-
-        # Pre-render text surfaces.
-        self.text_surfaces = {
-            'title': self.font_large.render('Goblin Runner', True, self.COLORS['title_text']),
-            'demo': self.font_medium.render('Demo', True, self.COLORS['title_text']),
-            'start': self.font_regular.render('Start Game', True, self.COLORS['text']),
-            'credit_button': self.font_regular.render('Credits', True, self.COLORS['text']),
-            'quit': self.font_regular.render('Quit', True, self.COLORS['text']),
-            'back': self.font_regular.render('Back', True, self.COLORS['text']),
-            'credits_title': self.font_regular.render('Credits', True, self.COLORS['text'])
+        # Load and scale background images for each level.
+        self.backgrounds = {
+            1: pg.transform.scale(pg.image.load("GAME_DEV_FINAL/assets/background/lvl1.png"), (self.screen_width, self.screen_height)),
+            2: pg.transform.scale(pg.image.load("GAME_DEV_FINAL/assets/background/lvl2.png"), (self.screen_width, self.screen_height)),
+            3: pg.transform.scale(pg.image.load("GAME_DEV_FINAL/assets/background/lvl3.png"), (self.screen_width, self.screen_height))
         }
 
-        # Define rectangles for all buttons.
-        self.button_rects = {
-            'start': pg.Rect(0, 0, *self.BUTTON_DIMS['main']),
-            'credits': pg.Rect(0, 0, *self.BUTTON_DIMS['main']),
-            'quit': pg.Rect(0, 0, *self.BUTTON_DIMS['main']),
-            'back': pg.Rect(0, 0, *self.BUTTON_DIMS['back'])
-        }
+        # Set the custom font for all text.
+        self.font_path = "GAME_DEV_FINAL/assets/font/bytebounce/ByteBounce.ttf"
 
-        # Position the main menu buttons on the center of the screen.
-        self.button_rects['start'].center = (self.screen_width // 2, self.screen_height // 2 + 50)
-        self.button_rects['credits'].center = (self.screen_width // 2, self.screen_height // 2 + 180)
-        self.button_rects['quit'].center = (self.screen_width // 2, self.screen_height // 2 + 310)
-        self.button_rects['back'].center = (self.screen_width // 2, self.screen_height - 150)
+        # Customize font and color for level numbers.
+        self.level_font = pg.font.Font(self.font_path, level_font_size)
+        self.level_text_color = (0, 0, 0)
+        self.level_text_pos_y = level_text_pos_y
 
-        # Set a flag to know if the main menu is active.
-        self.menu_active = True
+        # Customize fonts and colors for "Thank You" screen.
+        self.thank_you_font = pg.font.Font(self.font_path, 100)
+        self.thank_you_color = (255, 255, 0)
+        self.menu_prompt_font = pg.font.Font(self.font_path, 60)
+        self.menu_prompt_color = (200, 200, 200)
 
-        # Load and scale the background image to fit the screen.
-        self.background_image_scaled = pg.transform.scale(
-            pg.image.load('GAME_DEV_FINAL/assets/background/intro.png'),
-            (self.screen_width, self.screen_height)
-        )
+        # Customize Font and color for "Game Over" screen.
+        self.game_over_font = pg.font.Font(self.font_path, 100)
+        self.game_over_color = (255, 0, 0)
 
-        # Add data for the credits screen: roles, names, and copyright.
-        self.creators_data = [
-            {'type': 'role_names', 'role': 'Project Lead', 'names': 'Joshua Bote, Arish Evangelista'},
-            {'type': 'role_names', 'role': 'Game Designer', 'names': 'Joshua Bote'},
-            {'type': 'role_names', 'role': 'Game Programmer', 'names': 'Joshua Bote'},
-            {'type': 'role_names', 'role': 'Story Creator', 'names': 'Arish Evangelista'},
-            {'type': 'role_names', 'role': 'Game Artists', 'names': 'Arish Evangelista, Jennifer Abino, MJ Royol'},
-            {'type': 'role_names', 'role': 'Music', 'names': '\"Relaxing Music with Nature Sounds\", From MusicforBodyandSpirit'},
-            {'type': 'message', 'text': 'Copyright 2025. All rights reserved.'},
+        # Tutorial state and setup.
+        self.tutorial_active = False
+        self.tutorial_step = 0
+        
+        # Create a list for tutorial prompts: key, instruction, box color.
+        self.tutorial_prompts = [
+            ('A', "Press A to move left.", (0, 0, 0, 200)),
+            ('D', "Press D to move right.", (0, 0, 0, 200)),
+            ('SPACE', "Press SPACE to jump.", (0, 0, 0, 200)),
         ]
 
-    def handle_events(self, events):
-        # Checks mouse events in game menu. The return statement here will stop processing events.
-        if self.menu_active:
-            for event in events:
-                
-                # If the left mouse button was clicked, get the mouse's position.
-                if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                    mouse_pos = event.pos
+        # Customize font and color for tutorial text.
+        self.tutorial_font = pg.font.Font(self.font_path, 50)
+        self.tutorial_text_color = (255, 255, 255)
 
-                    # Check if "Start Game" button was clicked.
-                    if self.button_rects["start"].collidepoint(mouse_pos):
-                        self.menu_active = False
-                        self.game.start_game()
-                        return
-                    
-                    # Check if "Credits" button was clicked.
-                    elif self.button_rects["credits"].collidepoint(mouse_pos): 
-                        self.menu_active = False
-                        self.game.game_state = self.game.STATE_CREDITS
-                        return
-                    
-                    # Check if "Quit" button was clicked.
-                    elif self.button_rects["quit"].collidepoint(mouse_pos): 
-                        pg.quit()
-                        sys.exit()
+        # Customize font and color for tutorial title.
+        self.tutorial_title_font = pg.font.Font(self.font_path, 100)
+        self.tutorial_title_color = (0, 0, 0)
 
-        # While in credits screen, check the mouse events.
-        elif self.game.game_state == self.game.STATE_CREDITS:
-            for event in events:
-                # If the left mouse button was clicked, check if "Back" button was clicked and change game state back to main menu.
-                if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.button_rects["back"].collidepoint(event.pos): 
-                        self.game.game_state = self.game.STATE_MAIN_MENU 
-                        self.menu_active = True
-                        return
-    def draw(self):
-        # Draws the main menu elements on the screen.
-        if not self.menu_active:
-            return
+        # Customize tutorial box dimensions and position.
+        self.tutorial_rect_width = self.screen_width * 0.5
+        self.tutorial_rect_height = self.screen_height * 0.1
+        self.tutorial_rect_y_offset = self.screen_height * 0.50
+
+        # Map string keys to Pygame key constants.
+        self._key_map = {
+            'A': pg.K_a,
+            'D': pg.K_d,
+            'SPACE': pg.K_SPACE,
+        }
+
+        # Keep track of keys from the last frame to detect new presses.
+        self.previous_keys_pressed = pg.key.get_pressed()
+        self.current_expected_pg_key = None
+
+    def draw_background(self, screen, current_level):
+        # Shows the right background image for the current level.
+        if current_level in self.backgrounds:
+            screen.blit(self.backgrounds[current_level], (0, 0))
+        else:
+            # If no specific background, fill the screen black.
+            screen.fill((0, 0, 0))
+
+    def draw_level_text(self, screen, current_level):
+        # Customize and display "Level X" text at the top of the screen.
+        if current_level <= 3:
+            text_surface = self.level_font.render(f"Level {current_level}", True, self.level_text_color)
+            text_rect = text_surface.get_rect(center=(self.screen_width // 2, self.level_text_pos_y))
+            screen.blit(text_surface, text_rect)
+
+    def draw_thank_you_screen(self, screen):
+        # Shows the "Thank You for Playing" message and menu prompt.
         
-        # Draw the background image.
-        self.screen.blit(self.background_image_scaled, (0, 0))
-
-        # Draw the game title and demo subtitle.
-        self.screen.blit(self.text_surfaces["title"], 
-                         self.text_surfaces["title"].get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 200)))
-        self.screen.blit(self.text_surfaces["demo"], 
-                         self.text_surfaces["demo"].get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 130)))
-
-        # Get the current mouse position.
-        mouse_pos = pg.mouse.get_pos()
-
-        # Change button colors based on whether the mouse is hovering over them.
-        start_color = self.COLORS["hover"] if self.button_rects["start"].collidepoint(mouse_pos) else self.COLORS["button"]
-        credits_color = self.COLORS["hover"] if self.button_rects["credits"].collidepoint(mouse_pos) else self.COLORS["button"]
-        quit_color = self.COLORS["hover"] if self.button_rects["quit"].collidepoint(mouse_pos) else self.COLORS["button"]
+        # A background color for "Thank You for Playing" message
+        screen.fill((0, 0, 0))
         
-        # Draw the Start Game button and its rectangle. Draw the text on the button.
-        pg.draw.rect(self.screen, start_color, self.button_rects["start"], border_radius=10) # Draws the button rectangle.
-        self.screen.blit(self.text_surfaces["start"], self.text_surfaces["start"].get_rect(center=self.button_rects["start"].center))
+        # Customize the position and color of "Thank You for Playing" message and menu prompt.
+        message_surface = self.thank_you_font.render("Thank You For Playing Our Game!", True, self.thank_you_color)
+        message_rect = message_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 50))
+        screen.blit(message_surface, message_rect)
 
-        # Draw the Credits button and its rectangle. Draw the text on the button.
-        pg.draw.rect(self.screen, credits_color, self.button_rects["credits"], border_radius=10)
-        self.screen.blit(self.text_surfaces["credit_button"], 
-                         self.text_surfaces["credit_button"].get_rect(center=self.button_rects["credits"].center))
+        menu_prompt_surface = self.menu_prompt_font.render("Press SPACE to go back to Main Menu", True, self.menu_prompt_color)
+        menu_prompt_rect = menu_prompt_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
+        screen.blit(menu_prompt_surface, menu_prompt_rect)
 
-        # Draw the Quit button and its rectangle. Draw the text on the button.
-        pg.draw.rect(self.screen, quit_color, self.button_rects["quit"], border_radius=10)
-        self.screen.blit(self.text_surfaces["quit"], self.text_surfaces["quit"].get_rect(center=self.button_rects["quit"].center)) 
-
-        pg.display.flip()
-
-    def draw_credits_screen(self):
-        # Draws all the elements for the credits screen.
-        self.screen.blit(self.background_image_scaled, (0, 0)) # Draw the background image.
-
-        # Constants for layout and spacing on the credits screen.
-        HORIZONTAL_PAD, VERTICAL_PAD, COLUMN_GAP = 20, 30, 20
-        LINE_SPACING_ENTRY, LINE_SPACING_NAME = 5, 5 
-
-        # Set variables to track content dimensions.
-        max_role_width, max_names_width, total_content_height = 0, 0, 0 
-
-        # Set an empty lists to hold rendered credit lines and footer messages.
-        processed_lines, footer_messages = [], [] 
-
-        # Process each item in the creators_data to render text and specify sizes.
-        for item in self.creators_data:
-
-            # If it's a role with names, render the role text and each name. Then, split names by comma.
-            if item['type'] == "role_names":
-                role_surf = self.font_small.render(item['role'], True, self.COLORS["text"]) 
-                names_surfs = [self.font_small.render(name.strip(), True, self.COLORS["text"])
-                               for name in item['names'].split(',') if name.strip()] 
-
-                # Update max role width.
-                max_role_width = max(max_role_width, role_surf.get_width())
-
-                # If there are names, update max names width.
-                if names_surfs:
-                    max_names_width = max(max_names_width, max(s.get_width() for s in names_surfs)) 
-
-                # Get height of the role text.
-                role_height = role_surf.get_height()
-
-                # Calculate total height for names.
-                names_height = sum(s.get_height() for s in names_surfs) + max(0, (len(names_surfs) - 1)) * LINE_SPACING_NAME 
-                
-                # Add to total height.
-                total_content_height += max(role_height, names_height) + LINE_SPACING_ENTRY 
-
-                # Store rendered surfaces.
-                processed_lines.append((role_surf, names_surfs))
-
-            # If it's a copyright text, render and store the message.
-            elif item['type'] == "message": 
-                footer_messages.append(self.font_small.render(item['text'], True, self.COLORS["text"])) 
-
-        # Customize dimensions for the credit columns.
-        role_col_width = max_role_width + (HORIZONTAL_PAD * 2) 
-        names_col_width = max_names_width + (HORIZONTAL_PAD * 2)
-        common_col_height = total_content_height + (VERTICAL_PAD * 2)
-        total_columns_width = role_col_width + COLUMN_GAP + names_col_width
-
-        # X-coordinate to center the columns.
-        start_x_columns = (self.screen_width - total_columns_width) // 2 
+    def draw_game_over_screen(self, screen):
+        # Shows the "GAME OVER!" message and menu prompt.
+        screen.fill((0, 0, 0))
         
-        # Customize position and size for the "Credits" title box.
-        title_box_width = max(total_columns_width, self.text_surfaces["credits_title"].get_width() + 80)
-        # Create title box rectangle.
-        credits_title_box_rect = pg.Rect(start_x_columns, self.screen_height // 2 - common_col_height // 2 - 150, 
-                                         title_box_width, self.text_surfaces["credits_title"].get_height() + 40) 
-        credits_title_text_rect = self.text_surfaces["credits_title"].get_rect(center=credits_title_box_rect.center)
+        # Customize the position and color of "GAME OVER!" message and menu prompt.
+        game_over_surface = self.game_over_font.render("GAME OVER!", True, self.game_over_color)
+        game_over_rect = game_over_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 50))
+        screen.blit(game_over_surface, game_over_rect)
 
-        # Draw the title box.
-        pg.draw.rect(self.screen, self.COLORS["button"], credits_title_box_rect, border_radius=10) 
+        menu_prompt_surface = self.menu_prompt_font.render("You've been killed by enemy. Press SPACE to reset.", True, self.menu_prompt_color)
+        menu_prompt_rect = menu_prompt_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 50))
+        screen.blit(menu_prompt_surface, menu_prompt_rect)
 
-        # Draw the title text.
-        self.screen.blit(self.text_surfaces["credits_title"], credits_title_text_rect)
+    def start_tutorial(self):
+        # Starts the tutorial, setting it to the first step.
+        self.tutorial_active = True
+        self.tutorial_step = 0
+        
+        # Set the first expected key for the tutorial.
+        if self.tutorial_prompts:
+            self.current_expected_pg_key = self._key_map.get(self.tutorial_prompts[self.tutorial_step][0])
+        else:
+            # Turn off tutorial if no prompts.
+            self.tutorial_active = False
+            self.current_expected_pg_key = None
 
-        # Calculate starting Y-position for the credit columns.
-        start_y_columns = credits_title_box_rect.bottom + 50
+        # Reset key state.
+        self.previous_keys_pressed = pg.key.get_pressed()
 
-        # Create rectangles for the background of the role and name columns.
-        role_column_rect = pg.Rect(start_x_columns, start_y_columns, role_col_width, common_col_height) 
-        names_column_rect = pg.Rect(role_column_rect.right + COLUMN_GAP, start_y_columns, names_col_width, common_col_height)
+    def reset_tutorial(self):
+        # Turns off and resets the tutorial to the beginning.
+        self.tutorial_active = False
+        self.tutorial_step = 0
+        self.current_expected_pg_key = None
+        self.previous_keys_pressed = pg.key.get_pressed()
 
-        # Draw role and names column background.
-        pg.draw.rect(self.screen, self.COLORS["button"], role_column_rect, border_radius=10)
-        pg.draw.rect(self.screen, self.COLORS["button"], names_column_rect, border_radius=10)
+    def update_and_draw_tutorial(self, screen, current_keys_pressed):
+        # Manages the tutorial progression and draws tutorial messages. Returns True when the tutorial is finished.
 
-        # Starting Y for the first credit entry.
-        current_y_entry = role_column_rect.top + VERTICAL_PAD
+        # Stop tutorial if done or inactive.
+        if not self.tutorial_active or self.tutorial_step >= len(self.tutorial_prompts):
+            self.tutorial_active = False 
+            return True
 
-        # Draw each credit entry (role and names). Position the role text and draw it.
-        for role_surf, names_surfs in processed_lines:
-            role_text_rect = role_surf.get_rect(centerx=role_column_rect.centerx, top=current_y_entry) 
-            self.screen.blit(role_surf, role_text_rect)
+        # Draw the "Tutorial" title.
+        title_surface = self.tutorial_title_font.render("TUTORIAL", True, self.tutorial_title_color)
+        title_rect = title_surface.get_rect(center=(self.screen_width // 2, self.tutorial_rect_y_offset - 80))
+        screen.blit(title_surface, title_rect)
 
-            # Start Y for names in this entry
-            current_y_name = current_y_entry
+        key_string, prompt_text, rect_color = self.tutorial_prompts[self.tutorial_step]
+        expected_pg_key = self._key_map.get(key_string)
 
-            for name_surf in names_surfs:
-                # Position name text and draw it.
-                name_text_rect = name_surf.get_rect(centerx=names_column_rect.centerx, top=current_y_name) 
-                self.screen.blit(name_surf, name_text_rect)
+        # Check if the correct key is pressed to advance the tutorial.
+        if expected_pg_key:
+            key_pressed_now = current_keys_pressed[expected_pg_key]
+            key_was_pressed_before = self.previous_keys_pressed[expected_pg_key]
 
-                # Move Y down for next name.
-                current_y_name += name_surf.get_height() + LINE_SPACING_NAME
-            
-            # Calculate total height of this entry.
-            entry_height = max(role_surf.get_height(), sum(s.get_height() for s in names_surfs) + max(0, (len(names_surfs) - 1)) * LINE_SPACING_NAME)
-            
-            # Move Y down for the next credit entry.
-            current_y_entry += entry_height + LINE_SPACING_ENTRY
+            if (key_string in ['A', 'D'] and key_pressed_now) or \
+               (key_string == 'SPACE' and key_pressed_now and not key_was_pressed_before):
+                self.tutorial_step += 1 # Move to next tutorial step.
 
-        # Draw footer messages (like copyright).
-        footer_y = max(role_column_rect.bottom, names_column_rect.bottom) + 150
+                # If there are more steps, update the expected key.
+                if self.tutorial_step < len(self.tutorial_prompts):
+                    self.current_expected_pg_key = self._key_map.get(self.tutorial_prompts[self.tutorial_step][0])
+                else:
+                    # Set the tutorial as done.
+                    self.tutorial_active = False
+                    return True
 
-        # Loop through each footer message and draw the message.
-        for msg_surf in footer_messages: 
-            self.screen.blit(msg_surf, msg_surf.get_rect(centerx=self.screen_width // 2, top=footer_y))
+        # Save current key states for the next check.
+        self.previous_keys_pressed = current_keys_pressed
 
-        # Draw the "Back" button.
-        mouse_pos = pg.mouse.get_pos()
+        # Draw the semi-transparent box for tutorial text.
+        box_surface = pg.Surface((self.tutorial_rect_width, self.tutorial_rect_height), pg.SRCALPHA)
+        box_surface.fill(rect_color)
+        box_x = (self.screen_width - self.tutorial_rect_width) // 2
+        box_y = self.tutorial_rect_y_offset
+        screen.blit(box_surface, (box_x, box_y))
 
-        # Determine button color.
-        back_color = self.COLORS["hover"] if self.button_rects["back"].collidepoint(mouse_pos) else self.COLORS["button"]
+        # Draw the tutorial instruction text inside the box.
+        text_surface = self.tutorial_font.render(prompt_text, True, self.tutorial_text_color)
+        text_rect = text_surface.get_rect(center=(box_x + self.tutorial_rect_width // 2, box_y + self.tutorial_rect_height // 2))
+        screen.blit(text_surface, text_rect)
 
-        # Draw the back button rectangle.
-        pg.draw.rect(self.screen, back_color, self.button_rects["back"], border_radius=10)
-
-        # Draw the "Back" text.
-        self.screen.blit(self.text_surfaces["back"], self.text_surfaces["back"].get_rect(center=self.button_rects["back"].center))
-
-        pg.display.flip()
+        # Run this if tutorial is still running.
+        return False
