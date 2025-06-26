@@ -19,7 +19,7 @@ class GameMenu:
         self.screen_width = screen.get_width()
         self.screen_height = screen.get_height()
 
-        # Set the file path for the custom font and set the various variable with specified size.
+        # Set the file path for the custom font and set the various variable with specified size. (Change the path file here)
         self.font_path = 'GAME_DEV_FINAL/assets/font/bytebounce/ByteBounce.ttf'
         self.font_large = pg.font.Font(self.font_path, 220)
         self.font_medium = pg.font.Font(self.font_path, 100)
