@@ -1,4 +1,4 @@
-# Music Management System
+# MUSIC MANAGEMENT SYSTEM
 
 import pygame as pg
 
