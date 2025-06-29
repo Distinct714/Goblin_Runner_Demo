@@ -1,281 +1,233 @@
-# ENEMY MANAGEMENT SYSTEM
+# Enemy Management System
 
 import pygame as pg
-import random 
+import random
 
 class Enemy:
+    # Stores paths to animation images for each enemy type by level and direction.
+    ENEMY_ANIMATION_PATHS = {
+        1: { # Level 1 enemies (Slimes)
+            'left': [f"GAME_DEV_FINAL/assets/sprite/slime/{i}.png" for i in range(1, 7)], 
+            'right': [f"GAME_DEV_FINAL/assets/sprite/slime/{i}.png" for i in range(1, 7)] 
+            },
+
+        2: { # Level 2 enemies (Goblins)
+            'left': [f"GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_left/{i}.png" for i in range(1, 5)],
+            'right': [f"GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_right/{i}.png" for i in range(1, 5)]
+            },
+
+        3: { # Level 3 enemies (Ogres)
+            'left': [f"GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/{i}.png" for i in range(1, 7)],
+            'right': [f"GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/{i}.png" for i in range(1, 7)]
+            }
+    }
+
+    # Defines the image size (width, height) for each enemy type.
+    ENEMY_SIZES = {
+        1: (180, 180),
+        2: (155, 155),
+        3: (210, 210)
+    }
 
     def __init__(self, screen_width, screen_height, max_level):
+        # Stores the game screen's width and height.
         self.screen_width = screen_width
         self.screen_height = screen_height
+
+        # Stores the highest level number in the game.
         self.max_level = max_level
 
-        # Define custom sizes for each enemy types (width, height), where the keys are the levels.
-        self.enemy_sizes = {
-            1: (180, 180),
-            2: (150, 150),
-            3: (210, 210)
-        }
-
-        # Define custom initial positions for EACH enemy.
+        # Defines the enemy's starting position in the game for different levels.
         self.enemy_initial_positions = {
             1: [(self.screen_width * 3 // 4 - 75, self.screen_height - 260)],
-            2: [ # Three Goblins
-                (self.screen_width * 1 // 5, self.screen_height - 240),
-                (self.screen_width // 2 - 50, self.screen_height - 240),
-                (self.screen_width * 3 // 4 - 90, self.screen_height - 240)
-            ],
-            3: [# Single Ogre
-                (self.screen_width * 1 // 1 - 5, self.screen_height - 330),
+
+            2: [(self.screen_width * 1 // 5, self.screen_height - 251),
+                (self.screen_width // 2 - 50, self.screen_height - 251),
+                (self.screen_width * 3 // 4 - 90, self.screen_height - 251)],
+                
+            3: [(self.screen_width * 1 // 1 - 5, self.screen_height - 330),
                 (self.screen_width * 2 // 7 - 110, self.screen_height - 330),
-                (self.screen_width * 3 // 4 - 200, self.screen_height - 330)
-            ] 
+                (self.screen_width * 3 // 4 - 230, self.screen_height - 330)]
         }
 
-        # --- Define Enemy Animation Image Paths ---
-        # Each level/enemy type now has 'left' and 'right' animation lists
-        self.enemy_animation_paths = {
-            1: { # Slime
-                'left': [
-                    "GAME_DEV_FINAL/assets/sprite/slime/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/4.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/5.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/6.png"
-                ],
-                'right': [
-                    "GAME_DEV_FINAL/assets/sprite/slime/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/4.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/5.png",
-                    "GAME_DEV_FINAL/assets/sprite/slime/6.png"
-                ]
-            },
-            2: { # Goblin
-                'left': [
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_left/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_left/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_left/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_left/4.png"
-                ],
-                'right': [
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_right/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_right/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_right/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/goblin/pixel-frame-goblin_right/4.png"
-                ]
-            },
-            3: { # Ogre
-                'left': [
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/4.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/5.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_left/6.png"
-                ],
-                'right': [
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/1.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/2.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/3.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/4.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/5.png",
-                    "GAME_DEV_FINAL/assets/sprite/ogre/pixel-frame-ogre_right/6.png"
-                ]
-            }
-        }
-
-        # self.level_enemies_data will now store a LIST of enemy dicts for each level
+        # This dictionary will store all the enemy information, grouped by level.
         self.level_enemies_data = {} 
-        self._initialize_all_enemies_data()
+        
+        # Calls this method to set up all enemy data when the game starts.
+        self.initialize_all_enemies_data() 
 
-        # These are no longer needed to store the *current* enemy's image/rect
-        # as update/draw will operate on the list of enemies directly.
-        # self.image = None 
-        # self.rect = pg.Rect(0, 0, 0, 0) 
-
-    def _initialize_all_enemies_data(self):
-        """
-        Populates self.level_enemies_data with initial configurations for each level's enemy(ies),
-        including loading their animation frames.
-        """
+    def initialize_all_enemies_data(self):
+        # Loops through each game level to set up enemies for it.
         for level in range(1, self.max_level + 1):
-            animation_paths_for_level = self.enemy_animation_paths.get(level)
-            enemy_size = self.enemy_sizes.get(level, (80, 80)) # Get custom size or default
-            initial_positions_for_level = self.enemy_initial_positions.get(level, [])
+            # Gets the image size for enemies in specific level
+            enemy_size = self.ENEMY_SIZES.get(level, (80, 80))
 
-            # Load animation frames for left and right directions for this level's enemy type
-            loaded_animations = {
-                'left': [],
-                'right': []
-            }
-            if animation_paths_for_level:
-                for direction_key in ['left', 'right']:
-                    paths = animation_paths_for_level.get(direction_key, [])
-                    for path in paths:
-                        original_img = pg.image.load(path).convert_alpha()
-                        scaled_img = pg.transform.scale(original_img, enemy_size)
-                        loaded_animations[direction_key].append(scaled_img)
+            # Create an empty dictionary to hold loaded animation images.
+            loaded_animations = {} 
 
-            # Ensure there's at least one frame even if loading failed for all (critical for modulo)
-            # This part serves as a fallback to prevent errors if image lists are empty.
-            if not loaded_animations['left']:
-                placeholder = pg.Surface(enemy_size)
-                placeholder.fill((255, 0, 0))
-                loaded_animations['left'].append(placeholder)
-            if not loaded_animations['right']:
-                placeholder = pg.Surface(enemy_size)
-                placeholder.fill((255, 0, 0))
-                loaded_animations['right'].append(placeholder)
+            # Loops through 'left' and 'right' directions to load animations for each.
+            for direction in ['left', 'right']:
+                # Gets the list of image paths for the current level and direction.
+                # Use .get() with empty dicts/lists to handle missing data.
+                direction_paths = self.ENEMY_ANIMATION_PATHS.get(level, {}).get(direction, [])
 
-            # Create enemy data for each enemy in this level
-            self.level_enemies_data[level] = [] # Initialize as a list
-            for i, (enemy_x, enemy_y) in enumerate(initial_positions_for_level):
-                enemy_speed = (3 + (level * 0.5)) + (i * 0.2) # Slightly vary speed if multiple enemies
-                initial_direction = random.choice([-1, 1]) # -1 for left, 1 for right
+                # Create a list to store loaded images for this direction.
+                loaded_images_for_direction = [] 
+
+                # Load and scale the image from the path. Then add the scaled image to the list.
+                for path in direction_paths:
+                    image = pg.image.load(path).convert_alpha()    
+                    scaled_image = pg.transform.scale(image, enemy_size) 
+                    loaded_images_for_direction.append(scaled_image)
+                
+                # Store the list of loaded and scaled images under the current direction.
+                loaded_animations[direction] = loaded_images_for_direction
+
+            # Creates an empty list to store individual enemy data for the current level.
+            self.level_enemies_data[level] = [] 
+
+            # Goes through each predefined starting position for enemies at this level.
+            for i, (enemy_x, enemy_y) in enumerate(self.enemy_initial_positions.get(level, [])):
+                # Randomly decides if the enemy starts moving left (-1) or right (1).
+                initial_direction = random.choice([-1, 1]) 
+
+                # Sets the starting animation ('left' or 'right') based on the initial direction. (Using ternary)
                 initial_animation_set = 'right' if initial_direction == 1 else 'left'
 
-                enemy_data = {
-                    'speed': enemy_speed,
-                    'animations': loaded_animations, # All enemies of this level share the same loaded animation frames
-                    'rect': pg.Rect(enemy_x, enemy_y, enemy_size[0], enemy_size[1]), # Use initial rect
-                    'direction': initial_direction,
-                    'can_move': False, # Enemy starts static
-                    'initial_x': enemy_x, # Store for reset
-                    'initial_y': enemy_y, # Store for reset
-                    'current_frame_index': 0, # Current frame for animation
-                    'animation_frame_counter': 0, # Counter to control animation speed
-                    'animation_speed_frames': 16, # Number of game frames per animation sprite
-                    'current_animation_set': initial_animation_set # 'left' or 'right'
-                }
-                # Set the initial image for this specific enemy data entry
-                if enemy_data['animations'][initial_animation_set]:
-                    enemy_data['image'] = enemy_data['animations'][initial_animation_set][0]
-                else:
-                    enemy_data['image'] = loaded_animations['right'][0] # Fallback to a default if initial set is empty
-                
-                self.level_enemies_data[level].append(enemy_data)
 
+                enemy_data = {
+                    # Defines how fast this specific enemy moves, varying by level and index.
+                    'speed': (3 + (level * 0.5)) + (i * 0.2), 
+
+                    # Stores all loaded animation images for this enemy type.
+                    'animations': loaded_animations,
+
+                    # Creates the enemy's position and size rectangle.
+                    'rect': pg.Rect(enemy_x, enemy_y, *enemy_size),
+
+                    # Stores the enemy's current movement direction (-1 for left, 1 for right).
+                    'direction': initial_direction,
+
+                    # Flag to control whether the enemy is allowed to move.       
+                    'can_move': False,  
+
+                    # Stores the original starting X position for resets.                     
+                    'initial_x': enemy_x,        
+                    
+                    # Stores the original starting Y position for resets.            
+                    'initial_y': enemy_y, 
+
+                    # The index of the current image frame in its animation.                   
+                    'current_frame_index': 0,      
+
+                    # Counts game frames to control animation speed.          
+                    'animation_frame_counter': 0,            
+
+                    # How many game frames pass before the animation changes to the next image.
+                    'animation_speed_frames': 5,  
+
+                    # Which set of animations (left or right) is currently active.          
+                    'current_animation_set': initial_animation_set 
+                }
+
+                # Sets the enemy's displayed image to the first frame of its starting animation.
+                enemy_data['image'] = enemy_data['animations'][initial_animation_set][0]
+
+                # Adds this enemy's complete data to the level's list.
+                self.level_enemies_data[level].append(enemy_data) 
 
     def update(self, current_level, character_rect):
-        """
-        Updates all enemies for the current level. Handles horizontal movement
-        and boundary checks, and updates animation frames for each enemy.
-        """
-        if current_level not in self.level_enemies_data or not self.level_enemies_data[current_level]:
-            # No enemies for this level, or list is empty
-            return
+        # Updates all enemies in the current level, handling their movement and animation.
 
-        # Iterate through each enemy at the current level
+        # If no enemies are defined for the current level, stop.
+        if current_level not in self.level_enemies_data: 
+            return 
+
+        # Loops through each enemy that belongs to the current level.
         for enemy_data in self.level_enemies_data[current_level]:
+
             if enemy_data['can_move']:
-                # Independent horizontal movement
+                # Changes the enemy's horizontal position based on its speed and direction.
                 enemy_data['rect'].x += enemy_data['speed'] * enemy_data['direction']
 
-                # Reverse direction upon hitting screen edges and update animation set
-                if enemy_data['rect'].right >= self.screen_width - 10: 
+                # Checks if the enemy hits the right screen edge. Makes the enemy move to left with animation that faces left.
+                if enemy_data['rect'].right >= self.screen_width - 10:
                     enemy_data['direction'] = -1
                     enemy_data['current_animation_set'] = 'left'
+                
+                # Checks if the enemy hits the left screen edge. Makes the enemy move to right with animation that faces right.
                 elif enemy_data['rect'].left <= 10:
                     enemy_data['direction'] = 1
                     enemy_data['current_animation_set'] = 'right'
                 
-                # --- Animation Update Logic ---
-                enemy_data['animation_frame_counter'] += 1
+                # Increments the counter for animation frames.
+                enemy_data['animation_frame_counter'] += 1 
+                
+                # If enough frames have passed, switch to the next animation image and resets the counter.
                 if enemy_data['animation_frame_counter'] >= enemy_data['animation_speed_frames']:
                     enemy_data['animation_frame_counter'] = 0
-                    current_anim_set = enemy_data['animations'][enemy_data['current_animation_set']]
-                    if current_anim_set: # Ensure there are frames in the current animation set
-                        enemy_data['current_frame_index'] = (enemy_data['current_frame_index'] + 1) % len(current_anim_set)
-                    else:
-                        enemy_data['current_frame_index'] = 0 # Fallback
 
-                # Update the image to the current animation frame
-                current_anim_set = enemy_data['animations'][enemy_data['current_animation_set']]
-                if current_anim_set and len(current_anim_set) > enemy_data['current_frame_index']:
-                    enemy_data['image'] = current_anim_set[enemy_data['current_frame_index']]
-                else:
-                    # Fallback if animation set or index is somehow invalid
-                    enemy_data['image'] = enemy_data['animations']['right'][0] # Default to first right frame
+                    # Gets the list of images for the current animation direction (left or right).
+                    current_anim_set = enemy_data['animations'][enemy_data['current_animation_set']]
+
+                    # Moves to the next animation frame, cycling back to the start if it reaches the end.
+                    enemy_data['current_frame_index'] = (enemy_data['current_frame_index'] + 1) % len(current_anim_set)
+
+                # Sets the enemy's displayed image to the current frame of its active animation.
+                enemy_data['image'] = enemy_data['animations'][enemy_data['current_animation_set']][enemy_data['current_frame_index']]
 
     def draw(self, screen, current_level):
-        """
-        Draws all active enemies for the current level on the screen.
-        """
-        if current_level not in self.level_enemies_data:
-            return # No enemies for this level
+        # Draws all active enemies for the given level onto the game screen.
 
+        # Do nothing if no enemies are set up for this level.
+        if current_level not in self.level_enemies_data: 
+            return 
+        
+        # Draws the enemy's current image at its position.
         for enemy_data in self.level_enemies_data[current_level]:
-            # Only draw if there's a valid image and rect
-            if 'image' in enemy_data and 'rect' in enemy_data:
-                screen.blit(enemy_data['image'], enemy_data['rect'])
+            screen.blit(enemy_data['image'], enemy_data['rect']) 
 
     def reset_for_level(self, level):
-        """
-        Resets all enemies for a specific level to their defined initial positions and pauses their movement.
-        Also resets their animation states.
-        """
+        # Resets all enemies in a specific level to their original starting states.
         if level in self.level_enemies_data:
             for enemy_data in self.level_enemies_data[level]:
-                enemy_data['rect'].x = enemy_data['initial_x'] # Reset to defined initial X
-                enemy_data['rect'].y = enemy_data['initial_y'] # Reset to defined initial Y
                 
-                enemy_data['direction'] = random.choice([-1, 1]) # Still randomize initial direction
+                # Moves enemy back to its initial starting X and Y position.
+                enemy_data['rect'].topleft = (enemy_data['initial_x'], enemy_data['initial_y'])
+
+                # Randomly sets a new starting movement direction.
+                enemy_data['direction'] = random.choice([-1, 1]) 
+
+                # Updates the animation set based on the new random direction. (Using ternary)
                 enemy_data['current_animation_set'] = 'right' if enemy_data['direction'] == 1 else 'left'
                 
+                # Stops the enemy from moving.
                 enemy_data['can_move'] = False 
-                
-                enemy_data['current_frame_index'] = 0 # Reset animation frame
-                enemy_data['animation_frame_counter'] = 0 # Reset animation counter
-                
-                # Update the image to the first frame of the new initial animation set
-                if enemy_data['animations'][enemy_data['current_animation_set']]:
-                    enemy_data['image'] = enemy_data['animations'][enemy_data['current_animation_set']][0]
-                else:
-                    enemy_data['image'] = enemy_data['animations']['right'][0] # Fallback
 
+                # Resets the animation to the first frame.
+                enemy_data['current_frame_index'] = 0
+
+                # Resets the animation counter.
+                enemy_data['animation_frame_counter'] = 0
+
+                # Sets the enemy's image to the first frame of its newly determined animation set.
+                enemy_data['image'] = enemy_data['animations'][enemy_data['current_animation_set']][0]
 
     def reset_all_enemies(self):
-        """
-        Resets all enemies across all levels to their defined initial positions and pauses their movement.
-        Also resets their animation states.
-        """
-        for level_enemies_list in self.level_enemies_data.values():
-            for enemy_data in level_enemies_list:
-                enemy_data['rect'].x = enemy_data['initial_x'] # Reset to defined initial X
-                enemy_data['rect'].y = enemy_data['initial_y'] # Reset to defined initial Y
-                
-                enemy_data['direction'] = random.choice([-1, 1])
-                enemy_data['current_animation_set'] = 'right' if enemy_data['direction'] == 1 else 'left'
-                
-                enemy_data['can_move'] = False 
-                
-                enemy_data['current_frame_index'] = 0 # Reset animation frame
-                enemy_data['animation_frame_counter'] = 0 # Reset animation counter
-
-                # Update the image to the first frame of the new initial animation set
-                # Fixed: Changed 'level_data' to 'enemy_data' to reference the current enemy's data
-                if enemy_data['animations'][enemy_data['current_animation_set']]: 
-                    enemy_data['image'] = enemy_data['animations'][enemy_data['current_animation_set']][0]
-                else:
-                    enemy_data['image'] = enemy_data['animations']['right'][0] # Fallback
-
+        # Resets all enemies across all levels to their starting positions and states.
+        for level in self.level_enemies_data:
+            self.reset_for_level(level) 
 
     def start_movement_for_level(self, level):
-        """
-        Enables movement for all enemies at the specified level.
-        """
+        # Enables movement for all enemies in a specific level.
         if level in self.level_enemies_data:
+
+            # Sets the 'can_move' flag to True, allowing the enemy to start moving.
             for enemy_data in self.level_enemies_data[level]:
                 enemy_data['can_move'] = True
 
-    def get_current_enemy_rects(self, current_level): # Renamed method for clarity
-        """
-        Returns a list of Pygame Rect objects for all enemies of the current level for collision detection.
-        Returns an empty list if no enemy data exists for the level.
-        """
-        if current_level in self.level_enemies_data:
-            return [enemy_data['rect'] for enemy_data in self.level_enemies_data[current_level]]
-        return [] # Return an empty list if no enemies for level
+    def get_current_enemy_rects(self, current_level):
+        # Returns a list of the current positions for all enemies in the given level.
+        # This list is typically used to check for collisions with other game objects.
+        # Uses .get() with an empty list as default to safely handle levels without enemies.
+        return [enemy_data['rect'] for enemy_data in self.level_enemies_data.get(current_level, [])]
