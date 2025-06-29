@@ -3,8 +3,9 @@
 import pygame as pg
 
 class Character:
-    # Stores all the image file paths for character animations.  (Using List Comprehension for short code)
+    # Stores all the image file paths for character animations. (Using List Comprehension for short code)
     CHARACTER_ANIMATIONS = {
+
         # Images for standing still, facing left and right.
         'idle_left': [f'GAME_DEV_FINAL/assets/sprite/shinji/shinji standing left/standing{i} left.png' for i in range(1, 5)],
         'idle_right': [f'GAME_DEV_FINAL/assets/sprite/shinji/shinji standing right/standing{i}.png' for i in range(1, 5)],
@@ -39,7 +40,7 @@ class Character:
         self.vertical_velocity = 0
 
         # Set the high jump for character (negative integer for moving up).
-        self.jump_power = -40
+        self.jump_power = -42
 
         # Set the gravity that pulls the character down.
         self.gravity = 3
@@ -47,7 +48,7 @@ class Character:
         # The y-coordinate where the character stands on the ground.
         self.initial_y = start_y
 
-        # Hold all the loaded animation images for each direction.
+        # Hold all the loaded animation images for each direction in empty list.
         self.character_animations = {
             'idle_left': [], 
             'idle_right': [],
@@ -119,13 +120,13 @@ class Character:
                 self.is_jumping = False
                 self.vertical_velocity = 0
         
-        # Decide which animation name to use based on character's state.
+        # Decide which animation movement to use based on character's state.
         if self.is_jumping:
             # If jumping, use the jump animation for the last horizontal direction.
             target_direction = f'jump_{self.last_horizontal_direction}'
         
         elif moving_horizontally:
-            # If moving horizontally, use the walking animation for that direction.
+            # If moving horizontally, use the walking animation for the last horizontal direction.
             target_direction = self.last_horizontal_direction
         
         else:
@@ -142,7 +143,7 @@ class Character:
         if self.is_jumping or moving_horizontally:
             self.animation_frame_counter += 1
             
-            # If enough frames have passed to change the animation image:
+            # If enough frames have passed to change the animation image, reset to 0 game frames.
             if self.animation_frame_counter >= self.animation_speed_frames:
                 self.animation_frame_counter = 0
 
@@ -166,7 +167,7 @@ class Character:
         self.image = self.character_animations.get(self.current_direction, self.character_animations['idle_right'])[self.current_frame_index]
 
     def draw(self, screen):
-        # Draws the character's current image in the game screen at its position.
+        # Draws the character's current image in the game screen with fixed position.
         screen.blit(self.image, self.rect)
 
     def jump(self):
