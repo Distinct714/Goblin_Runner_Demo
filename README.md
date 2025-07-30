@@ -6,8 +6,8 @@ This game is all about reaching the final destination by running various nature 
 
 **Keys to Click:**
 - Press A and D key to move left and right
-- Press Space to jump
-- Press Space to move next dialogue
+- Press SPACE to jump
+- Press SPACE to move next dialogue
 
 # Warning
 This is not yet official game. The game is still in development and you might encounter an unexpected bugs here.
