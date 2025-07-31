@@ -3,6 +3,7 @@ This game is all about reaching the final destination by running various nature 
 
 ## Gameplay Tutorial
 - Avoid enemies at all cost by jumping to proceed to next level.
+- Run until you reach the end destination.
 
 **Keys to Click:**
 - Press A and D key to move left and right
