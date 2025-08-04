@@ -11,5 +11,5 @@ This game is all about reaching the final destination by running various nature 
 - Press SPACE to move next dialogue
 
 # Warning
-This is not yet official game. The game is still in development and you might encounter an unexpected bugs here.
+This is not yet official game. The game is still on development and you might encounter an unexpected bugs here. As for sound volume, you can adjust it outside the game since volume control is not yet implemented in this game.
 
