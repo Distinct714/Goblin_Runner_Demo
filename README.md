@@ -1,4 +1,4 @@
-# Goblin_Runner
+# Goblin_Runner_Demo
 This game is all about reaching the final destination by running various nature environment of the unknown world.
 
 ## Gameplay Tutorial
