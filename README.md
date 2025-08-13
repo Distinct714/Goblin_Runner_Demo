@@ -1,5 +1,6 @@
 # Goblin_Runner_Demo
 This game is all about reaching the final destination by running various nature environment of the unknown world.
+
 It was created by us, students of Polytechnic University of the Philippines, as our final project during first year college. You can download this and try for yourself.
 
 ## Gameplay Tutorial
