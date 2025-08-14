@@ -1,7 +1,7 @@
 # Goblin_Runner_Demo
 This game is all about reaching the final destination by running various nature environment of the unknown world.
 
-It was created by us, **students of Polytechnic University of the Philippines**, as our final project during first year college. 
+The project was created by us, **students of Polytechnic University of the Philippines** during our first year college. 
 
 You can download this and try for yourself.
 
@@ -15,5 +15,5 @@ You can download this and try for yourself.
 - Press SPACE to move next dialogue.
 
 # Warning
-This is unofficial game and it is only demo . The game is still on development and you might encounter an unexpected bugs here. As for sound volume, you can adjust it outside the game since volume control is not yet implemented in this game.
+This is unofficial game and it is only demo. The game is still on development and you might encounter an unexpected bugs here. As for sound volume, you can adjust it outside the game since volume control is not yet implemented in this game.
 
