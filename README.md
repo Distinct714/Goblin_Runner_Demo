@@ -3,7 +3,10 @@ This game is all about reaching the final destination by running various nature 
 
 The project was created by us, **students of Polytechnic University of the Philippines** during our first year college. 
 
-You can download this and try for yourself.
+## Installation Guide
+- Download this repository first.
+- If download is done, extract the files.
+- Then open the G
 
 ## Gameplay Tutorial
 - Avoid enemies at all cost by jumping to proceed to next level.
