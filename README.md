@@ -6,7 +6,8 @@ The project was created by us, **students of Polytechnic University of the Phili
 ## Installation Guide
 - Download this repository first.
 - If download is done, extract the files.
-- Then open the G
+- Then open the Goblin_Runner and run it on python.
+- For the best experience, install pygame -ce in terminal to avoid any problems.
 
 ## Gameplay Tutorial
 - Avoid enemies at all cost by jumping to proceed to next level.
