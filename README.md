@@ -4,7 +4,7 @@ This game is all about reaching the final destination by running various nature 
 The project was created by us, **students of Polytechnic University of the Philippines**, during our first year college. 
 
 ## Installation Guide
-- Download this repository first by clicking <code>.
+- Download this repository zip first by clicking <>code.
 - If download is done, extract the files.
 - Then open the Goblin_Runner and run it on python.
 - For the best experience, type pygame -ce in terminal to install all pygame packages to avoid any problems.
